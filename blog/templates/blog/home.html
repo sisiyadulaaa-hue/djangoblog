@@ -4,5 +4,14 @@
 
 {% block content %}
     <h1>Welcome to DjangoBlog</h1>
-    <p>This page will soon show a list of blog posts.</p>
-{% endblock %}  
+
+    {% for post in posts %}
+        <article>
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+        </article>
+    {% empty %}
+        <p>No blog posts available.</p>
+    {% endfor %}
+
+{% endblock %}
