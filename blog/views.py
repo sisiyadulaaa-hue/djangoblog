@@ -1,5 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 
 from .models import Post
 
@@ -47,3 +50,30 @@ def post_detail(request, slug):
     return render(request, "blog/post_detail.html", {
         "post": post
     })
+
+class PostCreateView(CreateView):
+    model = Post
+    fields = ["title", "content", "category", "tags", "status"]
+    template_name = "blog/post_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "post_detail",
+            kwargs={"slug": self.object.slug}
+        )
+
+class PostUpdateView(UpdateView):
+    model = Post
+    fields = ["title", "content", "category", "tags", "status"]
+    template_name = "blog/post_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "post_detail",
+            kwargs={"slug": self.object.slug}
+        )
+
+class PostDeleteView(DeleteView):
+    model = Post
+    template_name = "blog/post_confirm_delete.html"
+    success_url = reverse_lazy("home")
