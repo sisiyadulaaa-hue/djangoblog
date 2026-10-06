@@ -1,27 +1,99 @@
 {% extends "blog/base.html" %}
 
 {% block title %}
-    {% if object %}Edit Post{% else %}New Post{% endif %}
-{% endblock %}
-
-{% block content %}
-
-<h1>
     {% if object %}
         Edit Post
     {% else %}
         New Post
     {% endif %}
-</h1>
+{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
+{% block content %}
 
-    {{ form.as_p }}
+<div class="container">
 
-    <button type="submit" class="btn btn-success">
-        Save
-    </button>
-</form>
+    <h1 class="mb-4">
+        {% if object %}
+            Edit Post
+        {% else %}
+            New Post
+        {% endif %}
+    </h1>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        {% for field in form %}
+
+            <div class="mb-3">
+
+                {{ field.label_tag }}
+
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="text-danger">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+        <!-- Image Preview -->
+        <div class="mb-3">
+            <img
+                id="preview"
+                style="max-width: 300px; display: none;"
+                class="img-fluid rounded"
+                alt="Image Preview"
+            >
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            Save
+        </button>
+
+        <a href="{% url 'home' %}" class="btn btn-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+<script>
+const fileInput = document.querySelector('input[type="file"]');
+const preview = document.getElementById('preview');
+
+if (fileInput) {
+
+    fileInput.addEventListener('change', function(event) {
+
+        if (event.target.files.length > 0) {
+
+            const file = event.target.files[0];
+
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+
+        } else {
+
+            preview.style.display = 'none';
+
+        }
+
+    });
+
+}
+</script>
 
 {% endblock %}
