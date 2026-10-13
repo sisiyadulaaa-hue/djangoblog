@@ -1,0 +1,28 @@
+
+{% extends "blog/base.html" %}
+
+{% block title %}403 - Permission Denied{% endblock %}
+
+{% block content %}
+
+<div class="container text-center mt-5">
+
+    <h1 class="display-1 text-danger fw-bold">403</h1>
+
+    <h2 class="mb-3">Permission Denied</h2>
+
+    <p class="lead">
+        Sorry, you do not have permission to access this page.
+    </p>
+
+    <p class="text-muted">
+        You can only edit or delete your own posts.
+    </p>
+
+    <a href="{% url 'home' %}" class="btn btn-primary mt-3">
+        Back to Home
+    </a>
+
+</div>
+
+{% endblock %}

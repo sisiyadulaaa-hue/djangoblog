@@ -5,3 +5,15 @@ __pycache__/
 *.pyc
 db.sqlite3
 media/
+
+```gitignore
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# Environment secrets
+.env
+```

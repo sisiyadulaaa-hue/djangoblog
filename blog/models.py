@@ -1,5 +1,7 @@
+
 from django.db import models
 from django.utils.text import slugify
+from django.contrib.auth.models import User
 from PIL import Image
 
 
@@ -20,8 +22,16 @@ class Tag(models.Model):
 class Post(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Draft'),
-        ('published', 'Published')
+        ('published', 'Published'),
     ]
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='posts'
+    )
 
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
@@ -55,22 +65,44 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-
-        # Create slug automatically
         if not self.slug:
             self.slug = slugify(self.title)
 
-        # Save the post first
         super().save(*args, **kwargs)
 
-        # Resize cover image if it is larger than 800px
         if self.cover_image:
             img_path = self.cover_image.path
-            img = Image.open(img_path)
 
-            if img.height > 800 or img.width > 800:
-                img.thumbnail((800, 800))
-                img.save(img_path)
+            with Image.open(img_path) as img:
+                if img.height > 800 or img.width > 800:
+                    img.thumbnail((800, 800))
+                    img.save(img_path)
 
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="comments"
+    )
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="comments"
+    )
+
+    content = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"Comment by {self.author.username}"
+
+
+
