@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 from PIL import Image
+from pathlib import Path
 
 
 class Category(models.Model):
@@ -66,7 +67,15 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title) or 'post'
+            slug = base_slug
+            counter = 1
+
+            while Post.objects.filter(slug=slug).exists():
+                slug = f'{base_slug}-{counter}'
+                counter += 1
+
+            self.slug = slug
 
         super().save(*args, **kwargs)
 
@@ -86,23 +95,17 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name="comments"
+        related_name='comments'
     )
 
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="comments"
+        related_name='comments'
     )
 
     content = models.TextField()
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.author.username}"
-
-
-
+        return f'Comment by {self.author.username}'

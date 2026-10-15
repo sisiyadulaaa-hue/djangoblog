@@ -1,10 +1,10 @@
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth import login
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseForbidden
@@ -70,7 +70,8 @@ def post_list(request):
     )
 
 
-# Post detail and comments
+
+# Post detail - comments disabled
 def post_detail(request, slug):
     post = get_object_or_404(
         Post,
@@ -78,38 +79,14 @@ def post_detail(request, slug):
         status="published"
     )
 
-    comments = post.comments.select_related(
-        "author"
-    ).order_by("-created_at")
-
-    if request.method == "POST":
-        if not request.user.is_authenticated:
-            return redirect("login")
-
-        form = CommentForm(request.POST)
-
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            comment.save()
-
-            return redirect(
-                "post_detail",
-                slug=post.slug
-            )
-    else:
-        form = CommentForm()
-
     return render(
         request,
         "blog/post_detail.html",
         {
             "post": post,
-            "comments": comments,
-            "comment_form": form,
         }
     )
+
 
 
 # Delete comment (owner only)
@@ -133,6 +110,11 @@ def delete_comment(request, comment_id):
         post_slug = comment.post.slug
         comment.delete()
 
+        messages.success(
+            request,
+            "Comment deleted successfully!"
+        )
+
         return redirect(
             "post_detail",
             slug=post_slug
@@ -148,11 +130,17 @@ def delete_comment(request, comment_id):
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = "blog/register.html"
-    success_url = "/"
+    success_url = reverse_lazy("home")
 
     def form_valid(self, form):
         response = super().form_valid(form)
         login(self.request, self.object)
+
+        messages.success(
+            self.request,
+            "Your account was created successfully!"
+        )
+
         return response
 
 
@@ -165,6 +153,12 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+
+        messages.success(
+            self.request,
+            "Post published successfully!"
+        )
+
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -189,6 +183,14 @@ class PostUpdateView(
         post = self.get_object()
         return post.author == self.request.user
 
+    def form_valid(self, form):
+        messages.success(
+            self.request,
+            "Post updated successfully!"
+        )
+
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse_lazy(
             "post_detail",
@@ -211,16 +213,41 @@ class PostDeleteView(
         post = self.get_object()
         return post.author == self.request.user
 
+    def form_valid(self, form):
+        messages.success(
+            self.request,
+            "Post deleted successfully!"
+        )
+
+        return super().form_valid(form)
+
 
 # Login
 class UserLoginView(LoginView):
     template_name = "blog/login.html"
     redirect_authenticated_user = True
 
+    def form_valid(self, form):
+        messages.success(
+            self.request,
+            "You have logged in successfully!"
+        )
+
+        return super().form_valid(form)
+
 
 # Logout
 class UserLogoutView(LogoutView):
     next_page = "home"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            messages.success(
+                request,
+                "You have logged out successfully!"
+            )
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 # My Posts (show only the logged-in user's posts)
@@ -235,6 +262,7 @@ class MyPostsView(LoginRequiredMixin, ListView):
         return Post.objects.filter(
             author=self.request.user
         ).order_by("-created_at")
+
 
 # Custom 403 Permission Denied Page
 def permission_denied(request, exception=None):

@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 from django.urls import path, include
 
@@ -30,4 +29,3 @@ if settings.DEBUG:
 
 # Custom 403 Permission Denied Page
 handler403 = 'blog.views.permission_denied'
-

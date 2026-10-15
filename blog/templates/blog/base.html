@@ -25,13 +25,17 @@
 
 <body>
 
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
 
-        <a class="navbar-brand" href="{% url 'home' %}">
+    <div class="container-fluid">
+
+        <!-- Brand -->
+        <a class="navbar-brand fw-bold" href="{% url 'home' %}">
             DjangoBlog
         </a>
 
+        <!-- Mobile Toggle -->
         <button
             class="navbar-toggler"
             type="button"
@@ -44,37 +48,62 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
+        <!-- Navbar Content -->
         <div class="collapse navbar-collapse" id="navbarContent">
 
             <!-- Main Navigation Links -->
-            <div class="navbar-nav me-auto">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                <a class="nav-link" href="{% url 'home' %}">
-                    Home
-                </a>
+                <li class="nav-item">
+                    <a
+                        class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+                        href="{% url 'home' %}"
+                        {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}
+                    >
+                        Home
+                    </a>
+                </li>
 
-                <a class="nav-link" href="{% url 'about' %}">
-                    About
-                </a>
+                <li class="nav-item">
+                    <a
+                        class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
+                        href="{% url 'about' %}"
+                        {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}
+                    >
+                        About
+                    </a>
+                </li>
 
-                <a class="nav-link" href="{% url 'contact' %}">
-                    Contact
-                </a>
+                <li class="nav-item">
+                    <a
+                        class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
+                        href="{% url 'contact' %}"
+                        {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
+                    >
+                        Contact
+                    </a>
+                </li>
 
                 {% if user.is_authenticated %}
-                    <a class="nav-link" href="{% url 'my_posts' %}">
-                        My Posts
-                    </a>
+                    <li class="nav-item">
+                        <a
+                            class="nav-link {% if request.resolver_match.url_name == 'my_posts' %}active{% endif %}"
+                            href="{% url 'my_posts' %}"
+                            {% if request.resolver_match.url_name == 'my_posts' %}aria-current="page"{% endif %}
+                        >
+                            My Posts
+                        </a>
+                    </li>
                 {% endif %}
 
-            </div>
+            </ul>
 
-            <!-- User Authentication Links -->
-            <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Authentication Links -->
+            <div class="d-flex align-items-lg-center gap-2 flex-wrap py-2 py-lg-0">
 
                 {% if user.is_authenticated %}
 
-                    <span class="navbar-text text-white">
+                    <span class="navbar-text text-white me-lg-2">
                         Hello, {{ user.username }}
                     </span>
 
@@ -122,20 +151,47 @@
 
         </div>
 
-    </nav>
-
-    <!-- Page Content -->
-    <div class="container mt-4">
-
-        {% block content %}
-        {% endblock %}
-
     </div>
 
-    <!-- Bootstrap JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</nav>
+
+<!-- Page Content -->
+<div class="container mt-4">
+
+    <!-- Flash Messages -->
+    {% if messages %}
+        <div class="messages-container mb-4">
+
+            {% for message in messages %}
+
+                <div
+                    class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+                    role="alert"
+                >
+                    {{ message }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"
+                    ></button>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    {% block content %}
+    {% endblock %}
+
+</div>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
 </html>
-
